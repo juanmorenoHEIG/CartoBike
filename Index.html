@@ -8,26 +8,22 @@
             $(document).ready(function(){
                 
                 url_bikesharing = "ch.bfe.bikesharing";
-                //url_bikesharing = "https://juanmorenoheig.carto.com/builder/8be04829-3d43-44ec-8e9e-a302e1323900/embed";
 
                 map = new ol.Map({
                     view: new ol.View({
-                        center: [738600, 5840171], 
-                        zoom: 10
+                        center: ol.proj.transform([6.45, 46.7], 'EPSG:4326', 'EPSG:3857'),
+                        zoom: 9
                     }),
                     target: 'map',
                     layers: [
                         new ol.layer.Tile({
-                            source: new ol.source.OSM()
-                        })
-                        /*new ol.layer.Tile({
-                        title: 'Aerial',
-                        type: "base",
-                        source: new ol.source.BingMaps({
-                                key: 'AqE05oJsq-bWa50FPOW2S0eQm9Oqqygc1VTi_WPhUIoKR_-jgA559CRbfndgWAIz',
-                                imagerySet: 'Aerial'
-                            })
-                        }),*/
+                            title: 'Aerial',
+                            type: "base",
+                            source: new ol.source.BingMaps({
+                                    key: 'AqE05oJsq-bWa50FPOW2S0eQm9Oqqygc1VTi_WPhUIoKR_-jgA559CRbfndgWAIz',
+                                    imagerySet: 'Aerial'
+                                })
+                        }),
                         /*new ol.layer.Tile({
                         title: "BikeSharing",
                         source: new ol.source.TileWMS({
@@ -40,10 +36,11 @@
                                 }
                             })
                         })*/
+                        
                     ]
                 });
-                                
-                var mapConfig = {
+                              
+                /*var mapConfig = {
                     'layers': [{
                         'type': 'cartodb',
                         'options': {
@@ -60,7 +57,55 @@
                         config: mapConfig
                     })
                 });
+                map.addLayer(bikeLyr);*/
+
+                var q = "select*from%20public.ch_bfe_bikesharing_fr";
+                var fromat = "GeoJSON";
+                var key = "a1a59d709941fb82f30fafa226924d04a23ba185";
+
+                function createBikeShareStyle(feature, resolution) {
+                    var styleBikeShare = new ol.style.Style({
+                        image: new ol.style.Icon({
+                            src: "https://data.geo.admin.ch/ch.bfe.bikesharing/images/"+ feature.get('idsystem') +"_bike.png",
+                            anchor: [0.5, 1]
+                        }),
+                    });
+                    console.log(feature.get('idsystem'));
+                    return styleBikeShare;
+                };
+
+                var bikeLyr = new ol.layer.Vector({
+                   title: "BikeSharing",
+                   source: new ol.source.Vector({
+                       url: "https://juanmorenoheig.carto.com/api/v2/sql?q="+ q + "&format=" + fromat + "&api_key=" + key,
+                       format: new ol.format.GeoJSON()
+                   }),
+                   style: createBikeShareStyle
+                });
                 map.addLayer(bikeLyr);
+
+                // COMMENT FAIRE UNE EVENT SUR CLICK SUR UN BIKE POUR AFFICHER INFO
+
+                /*map.on('singleclick', function (evt) {
+                    var wmsSource = bikeLyr.getSource();
+
+                    // WMS GetFeatureInfo request generator
+                    var url = wmsSource.getGetFeatureInfoUrl(
+                            // clic context
+                            evt.coordinate,
+                            // map context
+                            map.getView().getResolution(),
+                            "EPSG:3857",
+                            {
+                                //INFO_FORMAT: "text/html"
+                                INFO_FORMAT: "application/json"
+                            }
+                    );
+                    if (url) getFeatureInfo(url);
+                });*/
+
+
+
 
                 /*var bikeWmsLayer = new ol.layer.Tile({
                     source: new ol.source.TileWMS({
