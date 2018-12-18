@@ -4,7 +4,7 @@
         <script type="text/javascript" src="js/config.js"></script>
         <script src="http://libs.cartocdn.com/cartodb.js/v3/3.15/cartodb.core.js"></script>
         <script type="text/javascript">
-            var map;
+            var map, url_bikeshareing;
             $(document).ready(function(){
                 map = new ol.Map({
                     view: new ol.View({
@@ -18,10 +18,18 @@
                               key: 'AqE05oJsq-bWa50FPOW2S0eQm9Oqqygc1VTi_WPhUIoKR_-jgA559CRbfndgWAIz',
                               imagerySet: 'Aerial'
                           })
-                      })
+                      }),
+
                     ]
                 });
-
+                url_bikeshareing = "ch.bfe.bikesharing";
+                bikeVectorLayer = new ol.layer.Vector({
+                    source: new ol.source.Vector({
+                        url: url_bikeshareing,
+                        format: new ol.format.GeoJSON()
+                    }),
+                });
+                map.addLayer(bikeVectorLayer);
                 
             })
         </script>
