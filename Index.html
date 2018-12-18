@@ -1,113 +1,170 @@
 <html>
-    <head>
-        <title>CartoBike</title>
-        <script type="text/javascript" src="js/config.js"></script>
-        <script src="http://libs.cartocdn.com/cartodb.js/v3/3.15/cartodb.core.js"></script>
-        <script type="text/javascript">
-            var map, url_bikesharing;
-            $(document).ready(function(){
-                
-                url_bikesharing = "ch.bfe.bikesharing";
 
-                map = new ol.Map({
-                    view: new ol.View({
-                        center: ol.proj.transform([6.45, 46.7], 'EPSG:4326', 'EPSG:3857'),
-                        zoom: 9
-                    }),
-                    target: 'map',
-                    layers: [
-                        new ol.layer.Tile({
-                            title: 'Aerial',
-                            type: "base",
-                            source: new ol.source.BingMaps({
-                                    key: 'AqE05oJsq-bWa50FPOW2S0eQm9Oqqygc1VTi_WPhUIoKR_-jgA559CRbfndgWAIz',
-                                    imagerySet: 'Aerial'
-                                })
-                        }),
-                        /*new ol.layer.Tile({
-                        title: "BikeSharing",
-                        source: new ol.source.TileWMS({
-                            url: chWMS,
-                            params: {
-                                VERSION: "1.0.0",
-                                LAYERS: url_bikesharing,
-                                FORMAT: "image/png",
-                                opacity: 0.5
-                                }
-                            })
-                        })*/
-                        
-                    ]
-                });
-                              
-                /*var mapConfig = {
-                    'layers': [{
-                        'type': 'cartodb',
-                        'options': {
-                            //'cartocss_vesrion': '2.1.1',
-                            //'cartocss':
-                            'sql': 'SELECT * FROM ch_bfe_bikesharing_fr'
-                        }
-                    }]
-                };
+<head>
+    <title>CartoBike</title>
+    <script type="text/javascript" src="js/config.js"></script>
+    <!--<script src="http://libs.cartocdn.com/cartodb.js/v3/3.15/cartodb.core.js"></script>-->
+    
+    <script type="text/javascript">
+        var map /*, url_bikesharing*/ ;
+        $(document).ready(function() {
 
-                var bikeLyr = new ol.layer.Tile({
-                    source: new ol.source.CartoDB({
-                        account: 'juanmorenoheig',
-                        config: mapConfig
+            //url_bikesharing = "ch.bfe.bikesharing";
+
+            /*-------------------------------------------
+            Ex 1 — Première couche de référence: Satellite map
+            -------------------------------------------*/
+            var satelliteMap = new ol.layer.Tile({
+                title: 'SatelliteMap',
+                type: "base",
+                source: new ol.source.BingMaps({
+                    key: 'AqE05oJsq-bWa50FPOW2S0eQm9Oqqygc1VTi_WPhUIoKR_-jgA559CRbfndgWAIz',
+                    imagerySet: 'Aerial'
+                })
+            });
+
+            /*-------------------------------------------
+            Ex 1 — Deuxième couche de référence: Frontière de la Suisse
+            -------------------------------------------*/
+            // style ne fonctionne pas!!!
+            // => source: https://openlayersbook.github.io/ch06-styling-vector-layers/example-01.html
+            //http://www.rhone-mediterranee.eaufrance.fr/milieux-aquatiques/poissons/js/openlayers-v3.19.1/apidoc/ol.layer.Tile.html
+            var frontiereSuisseStyle = new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: '#004000',
+                    width: 1
+                })
+            });
+
+            var frontiereSuisse = new ol.layer.Tile({
+                title: "FrontiereSuisse",
+                source: new ol.source.TileWMS({
+                    url: "https://wms.geo.admin.ch",
+                    params: {
+                        VERSION: "1.1.1",
+                        LAYERS: "ch.swisstopo.swissboundaries3d-land-flaeche.fill",
+                        FORMAT: "image/png"
+                    }
+                }),
+                style: frontiereSuisseStyle,
+                opacity: 0.5
+            });
+
+            // Centre au milieu de la Suisse
+            var center = ol.proj.transform([8.2, 46.8], 'EPSG:4326', 'EPSG:3857');
+            var view = new ol.View({
+                center: center,
+                zoom: 8
+            });
+
+            map = new ol.Map({
+                target: 'map',
+                layers: [
+                    satelliteMap, 
+                    frontiereSuisse
+                ],
+                view: view
+            });
+
+            /*-------------------------------------------
+            Ex 2 — Première couches en superpositions qui viennent enrichir la visualisation en pertinence avec la thématique: Pistes cyclables
+            -------------------------------------------*/
+
+            /*-------------------------------------------
+            Ex 2 — Deuxième couches en superpositions qui viennent enrichir la visualisation en pertinence avec la thématique: Routes (voiture)
+            -------------------------------------------*/
+
+            /*-------------------------------------------
+            Ex 2 — Deuxième couches en superpositions qui viennent enrichir la visualisation en pertinence avec la thématique: Noms de rues
+            -------------------------------------------*/
+
+
+            /*new ol.layer.Tile({
+            title: "BikeSharing",
+            source: new ol.source.TileWMS({
+                url: chWMS,
+                params: {
+                    VERSION: "1.0.0",
+                    LAYERS: url_bikesharing,
+                    FORMAT: "image/png",
+                    opacity: 0.5
+                    }
+                })
+            })*/
+
+
+            /*var mapConfig = {
+                'layers': [{
+                    'type': 'cartodb',
+                    'options': {
+                        //'cartocss_vesrion': '2.1.1',
+                        //'cartocss':
+                        'sql': 'SELECT * FROM ch_bfe_bikesharing_fr'
+                    }
+                }]
+            };
+
+            var bikeLyr = new ol.layer.Tile({
+                source: new ol.source.CartoDB({
+                    account: 'juanmorenoheig',
+                    config: mapConfig
+                })
+            });
+            map.addLayer(bikeLyr);*/
+
+            /*-------------------------------------------
+            Ex 3 — Première couche en super superposition de type vector et les possibilités d'interaction avec celle-ci
+            -------------------------------------------*/
+
+            var q = "select*from%20public.ch_bfe_bikesharing_fr";
+            var fromat = "GeoJSON";
+            var key = "a1a59d709941fb82f30fafa226924d04a23ba185";
+
+            function createBikeShareStyle(feature, resolution) {
+                var styleBikeShare = new ol.style.Style({
+                    image: new ol.style.Icon({
+                        src: "https://data.geo.admin.ch/ch.bfe.bikesharing/images/" + feature.get('idsystem') + "_bike.png",
+                        anchor: [0.5, 1]
                     })
                 });
-                map.addLayer(bikeLyr);*/
+                console.log(feature.get('idsystem'));
+                return styleBikeShare;
+            };
 
-                var q = "select*from%20public.ch_bfe_bikesharing_fr";
-                var fromat = "GeoJSON";
-                var key = "a1a59d709941fb82f30fafa226924d04a23ba185";
+            var bikeLyr = new ol.layer.Vector({
+                title: "BikeSharing",
+                source: new ol.source.Vector({
+                    url: "https://juanmorenoheig.carto.com/api/v2/sql?q=" + q + "&format=" + fromat + "&api_key=" + key,
+                    format: new ol.format.GeoJSON()
+                }),
+                style: createBikeShareStyle
+            });
+            map.addLayer(bikeLyr);
 
-                function createBikeShareStyle(feature, resolution) {
-                    var styleBikeShare = new ol.style.Style({
-                        image: new ol.style.Icon({
-                            src: "https://data.geo.admin.ch/ch.bfe.bikesharing/images/"+ feature.get('idsystem') +"_bike.png",
-                            anchor: [0.5, 1]
-                        }),
-                    });
-                    console.log(feature.get('idsystem'));
-                    return styleBikeShare;
-                };
+            // COMMENT FAIRE UNE EVENT SUR CLICK SUR UN BIKE POUR AFFICHER INFO
 
-                var bikeLyr = new ol.layer.Vector({
-                   title: "BikeSharing",
-                   source: new ol.source.Vector({
-                       url: "https://juanmorenoheig.carto.com/api/v2/sql?q="+ q + "&format=" + fromat + "&api_key=" + key,
-                       format: new ol.format.GeoJSON()
-                   }),
-                   style: createBikeShareStyle
-                });
-                map.addLayer(bikeLyr);
+            /*map.on('singleclick', function (evt) {
+                var wmsSource = bikeLyr.getSource();
 
-                // COMMENT FAIRE UNE EVENT SUR CLICK SUR UN BIKE POUR AFFICHER INFO
-
-                /*map.on('singleclick', function (evt) {
-                    var wmsSource = bikeLyr.getSource();
-
-                    // WMS GetFeatureInfo request generator
-                    var url = wmsSource.getGetFeatureInfoUrl(
-                            // clic context
-                            evt.coordinate,
-                            // map context
-                            map.getView().getResolution(),
-                            "EPSG:3857",
-                            {
-                                //INFO_FORMAT: "text/html"
-                                INFO_FORMAT: "application/json"
-                            }
-                    );
-                    if (url) getFeatureInfo(url);
-                });*/
+                // WMS GetFeatureInfo request generator
+                var url = wmsSource.getGetFeatureInfoUrl(
+                        // clic context
+                        evt.coordinate,
+                        // map context
+                        map.getView().getResolution(),
+                        "EPSG:3857",
+                        {
+                            //INFO_FORMAT: "text/html"
+                            INFO_FORMAT: "application/json"
+                        }
+                );
+                if (url) getFeatureInfo(url);
+            });*/
 
 
 
 
-                /*var bikeWmsLayer = new ol.layer.Tile({
+            /*var bikeWmsLayer = new ol.layer.Tile({
                     source: new ol.source.TileWMS({
                         url: chWMS,
                         ratio: 1,
@@ -118,38 +175,43 @@
                         }
                     })
                 });
-            
+                
                 map.addLayer(bikeWmsLayer);*/
 
 
-                
-            })
-        </script>
 
-        <style type="text/css">
-            #map {
-                width: 100%;
-                height: 100%;
-            }
+        })
 
-            #info {
-                position: absolute;
-                top: 20px;
-                left: 60px;
-                background-color: white;
-                border: solid gray 1px;
-                padding: 5px;
-                font-size: smaller;
-                z-index: 1000000000;
-            }
+    </script>
 
-            p {
-                margin: 0;
-            }
-        </style>
-    </head>
-    <body>
-        <div id="map"></div>
-        <div id="info"></div>
-    </body>
+    <style type="text/css">
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        /*
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 60px;
+            background-color: white;
+            border: solid gray 1px;
+            padding: 5px;
+            font-size: smaller;
+            z-index: 1000000000;
+        }
+
+        p {
+            margin: 0;
+        }*/
+
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <!--<div id="info"></div>-->
+</body>
+
 </html>*/
