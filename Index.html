@@ -4,32 +4,79 @@
         <script type="text/javascript" src="js/config.js"></script>
         <script src="http://libs.cartocdn.com/cartodb.js/v3/3.15/cartodb.core.js"></script>
         <script type="text/javascript">
-            var map, url_bikeshareing;
+            var map, url_bikesharing;
             $(document).ready(function(){
+                
+                url_bikesharing = "ch.bfe.bikesharing";
+                //url_bikesharing = "https://juanmorenoheig.carto.com/builder/8be04829-3d43-44ec-8e9e-a302e1323900/embed";
+
                 map = new ol.Map({
                     view: new ol.View({
-                        center:[738600, 5840171],
+                        center: [738600, 5840171], 
                         zoom: 10
                     }),
                     target: 'map',
                     layers: [
-                      new ol.layer.Tile({
-                          source: new ol.source.BingMaps({
-                              key: 'AqE05oJsq-bWa50FPOW2S0eQm9Oqqygc1VTi_WPhUIoKR_-jgA559CRbfndgWAIz',
-                              imagerySet: 'Aerial'
-                          })
-                      }),
-
+                        new ol.layer.Tile({
+                            source: new ol.source.OSM()
+                        })
+                        /*new ol.layer.Tile({
+                        title: 'Aerial',
+                        type: "base",
+                        source: new ol.source.BingMaps({
+                                key: 'AqE05oJsq-bWa50FPOW2S0eQm9Oqqygc1VTi_WPhUIoKR_-jgA559CRbfndgWAIz',
+                                imagerySet: 'Aerial'
+                            })
+                        }),*/
+                        /*new ol.layer.Tile({
+                        title: "BikeSharing",
+                        source: new ol.source.TileWMS({
+                            url: chWMS,
+                            params: {
+                                VERSION: "1.0.0",
+                                LAYERS: url_bikesharing,
+                                FORMAT: "image/png",
+                                opacity: 0.5
+                                }
+                            })
+                        })*/
                     ]
                 });
-                url_bikeshareing = "ch.bfe.bikesharing";
-                bikeVectorLayer = new ol.layer.Vector({
-                    source: new ol.source.Vector({
-                        url: url_bikeshareing,
-                        format: new ol.format.GeoJSON()
-                    }),
+                                
+                var mapConfig = {
+                    'layers': [{
+                        'type': 'cartodb',
+                        'options': {
+                            //'cartocss_vesrion': '2.1.1',
+                            //'cartocss':
+                            'sql': 'SELECT * FROM ch_bfe_bikesharing_fr'
+                        }
+                    }]
+                };
+
+                var bikeLyr = new ol.layer.Tile({
+                    source: new ol.source.CartoDB({
+                        account: 'juanmorenoheig',
+                        config: mapConfig
+                    })
                 });
-                map.addLayer(bikeVectorLayer);
+                map.addLayer(bikeLyr);
+
+                /*var bikeWmsLayer = new ol.layer.Tile({
+                    source: new ol.source.TileWMS({
+                        url: chWMS,
+                        ratio: 1,
+                        params: {
+                            VERSION: "1.0.0",
+                            LAYERS: url_bikeshareing,
+                            FORMAT: "image/png"
+                        }
+                    })
+                });
+            
+                map.addLayer(bikeWmsLayer);*/
+
+
                 
             })
         </script>
@@ -60,4 +107,4 @@
         <div id="map"></div>
         <div id="info"></div>
     </body>
-</html>
+</html>*/

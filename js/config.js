@@ -45,6 +45,7 @@ var myOWS = "http://geoteach.heig-vd.ch:8080/geoserver/geoinfo/wms";
  */
 var chWMS = "https://wms.geo.admin.ch";
 
+
 /*
  * With the UNEP GRID GeoServer you can play with layers
  * (see the Global Risk Data Platform map at http://preview.grid.unep.ch/index.php?preview=map):
