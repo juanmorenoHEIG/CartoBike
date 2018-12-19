@@ -1,10 +1,15 @@
 <html>
 
 <head>
+    <meta charset="UTF-8" />
+
     <title>CartoBike</title>
+
+    <link href="css/style.css" type="text/css" rel="stylesheet">
+
     <script type="text/javascript" src="js/config.js"></script>
     <!--<script src="http://libs.cartocdn.com/cartodb.js/v3/3.15/cartodb.core.js"></script>-->
-    
+
     <script type="text/javascript">
         var map /*, url_bikesharing*/ ;
         $(document).ready(function() {
@@ -27,8 +32,7 @@
             Ex 1 — Deuxième couche de référence: Frontière de la Suisse
             -------------------------------------------*/
             // style ne fonctionne pas!!!
-            // => source: https://openlayersbook.github.io/ch06-styling-vector-layers/example-01.html
-            //http://www.rhone-mediterranee.eaufrance.fr/milieux-aquatiques/poissons/js/openlayers-v3.19.1/apidoc/ol.layer.Tile.html
+            // => http://www.rhone-mediterranee.eaufrance.fr/milieux-aquatiques/poissons/js/openlayers-v3.19.1/apidoc/ol.layer.Tile.html
             var frontiereSuisseStyle = new ol.style.Style({
                 stroke: new ol.style.Stroke({
                     color: '#004000',
@@ -47,20 +51,20 @@
                     }
                 }),
                 style: frontiereSuisseStyle,
-                opacity: 0.5
+                //opacity: 0.5
             });
 
             // Centre au milieu de la Suisse
             var center = ol.proj.transform([8.2, 46.8], 'EPSG:4326', 'EPSG:3857');
             var view = new ol.View({
                 center: center,
-                zoom: 8
+                zoom: 7.7
             });
 
             map = new ol.Map({
                 target: 'map',
                 layers: [
-                    satelliteMap, 
+                    satelliteMap,
                     frontiereSuisse
                 ],
                 view: view
@@ -69,6 +73,7 @@
             /*-------------------------------------------
             Ex 2 — Première couches en superpositions qui viennent enrichir la visualisation en pertinence avec la thématique: Pistes cyclables
             -------------------------------------------*/
+            // trouver seulement pour Zurich
 
             /*-------------------------------------------
             Ex 2 — Deuxième couches en superpositions qui viennent enrichir la visualisation en pertinence avec la thématique: Routes (voiture)
@@ -183,35 +188,41 @@
         })
 
     </script>
-
-    <style type="text/css">
-        #map {
-            width: 100%;
-            height: 100%;
-        }
-
-        /*
-        #info {
-            position: absolute;
-            top: 20px;
-            left: 60px;
-            background-color: white;
-            border: solid gray 1px;
-            padding: 5px;
-            font-size: smaller;
-            z-index: 1000000000;
-        }
-
-        p {
-            margin: 0;
-        }*/
-
-    </style>
 </head>
 
 <body>
-    <div id="map"></div>
-    <!--<div id="info"></div>-->
+    <header>
+        <h1>CartoBike</h1>
+        <p>This application is intended for users of rental bicycles.</p>
+    </header>
+
+    <div class="container">
+        <div class="left">
+            <h3 class="containerHead">Map</h3>
+            <div class="containerContenu">
+                <div id="map"></div>
+            </div>
+        </div>
+
+        <div class="right">
+            <h3 class="containerHead">Settings</h3>
+            <div class="containerContenu">
+                <!--<div id="info"></div>-->
+            </div>
+        </div>
+        
+        <div class="right">
+            <h3 class="containerHead">Informations</h3>
+            <div class="containerContenu">
+                <!--<div id="info"></div>-->
+            </div>
+        </div>
+        
+    </div>
+
+    <footer>
+        <p>Application by Juan Moreno and Stefanie Schlumpf   |   GÉOINF 18/19</p>
+    </footer>
 </body>
 
-</html>*/
+</html>
