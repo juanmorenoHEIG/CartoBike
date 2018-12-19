@@ -146,47 +146,24 @@
             });
             map.addLayer(bikeLyr);
 
-            // COMMENT FAIRE UNE EVENT SUR CLICK SUR UN BIKE POUR AFFICHER INFO
+            // Event sur click sur un bike pour afficher info
+            var selectInteraction = new ol.interaction.Select({
+                condition: ol.events.condition.singleClick,
+                // the interactive layers on which the selection is possible (they may be more than one)
+                layers: [bikeLyr]
+            });
+            map.addInteraction(selectInteraction);
 
-            /*map.on('singleclick', function (evt) {
-                var wmsSource = bikeLyr.getSource();
-
-                // WMS GetFeatureInfo request generator
-                var url = wmsSource.getGetFeatureInfoUrl(
-                        // clic context
-                        evt.coordinate,
-                        // map context
-                        map.getView().getResolution(),
-                        "EPSG:3857",
-                        {
-                            //INFO_FORMAT: "text/html"
-                            INFO_FORMAT: "application/json"
-                        }
-                );
-                if (url) getFeatureInfo(url);
-            });*/
-
-
-
-
-            /*var bikeWmsLayer = new ol.layer.Tile({
-                    source: new ol.source.TileWMS({
-                        url: chWMS,
-                        ratio: 1,
-                        params: {
-                            VERSION: "1.0.0",
-                            LAYERS: url_bikeshareing,
-                            FORMAT: "image/png"
-                        }
-                    })
-                });
-                
-                map.addLayer(bikeWmsLayer);*/
-
-
-
-        })
-
+            // add a listener to fire when one or more feature from the interactive layer(s) is(are) selected
+            selectInteraction.on('select', function(e) {
+                if (e.selected.length > 0) {
+                    var desc = e.selected[0].get("description");
+                    $("#info").html(desc);
+                } else {
+                    $("#info").html("Select icon on the map to get feature info");
+                }
+            });
+        });
     </script>
 </head>
 
@@ -207,21 +184,21 @@
         <div class="right">
             <h3 class="containerHead">Settings</h3>
             <div class="containerContenu">
-                <!--<div id="info"></div>-->
+                <!--xxx-->
             </div>
         </div>
-        
+
         <div class="right">
             <h3 class="containerHead">Informations</h3>
             <div class="containerContenu">
-                <!--<div id="info"></div>-->
+                <div id="info">Select icon on the map to get feature info</div>
             </div>
         </div>
-        
+
     </div>
 
     <footer>
-        <p>Application by Juan Moreno and Stefanie Schlumpf   |   GÉOINF 18/19</p>
+        <p>Application by Juan Moreno and Stefanie Schlumpf | GÉOINF 18/19</p>
     </footer>
 </body>
 
