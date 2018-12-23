@@ -23,6 +23,12 @@
 
         var imgSetValue = 0;
 
+        var center = ol.proj.transform([8.2, 46.8], 'EPSG:4326', 'EPSG:3857');
+        var view = new ol.View({
+            center: center,
+            zoom: 7.7
+        });
+
 
         function doGetMapRequests() {
             /*-------------------------------------------
@@ -38,6 +44,7 @@
                 })
             });
 
+            
             /*-------------------------------------------
             Ex 1 — Deuxième couche de référence: Frontière de la Suisse
             -------------------------------------------*/
@@ -63,13 +70,6 @@
                 //opacity: 0.5
             });
 
-            // Centre au milieu de la Suisse
-            var center = ol.proj.transform([8.2, 46.8], 'EPSG:4326', 'EPSG:3857');
-            var view = new ol.View({
-                center: center,
-                zoom: 7.7
-            });
-
             map = new ol.Map({
                 target: 'map',
                 layers: [
@@ -79,17 +79,6 @@
                 loadTilesWhileInteracting: true,
                 view: view
             });
-
-
-            /*-------------------------------------------
-            Ex 2 — Deuxième couches en superpositions qui viennent enrichir la visualisation en pertinence avec la thématique: Pistes cyclables
-            -------------------------------------------*/
-            // trouver seulement pour Zurich
-
-
-            /*-------------------------------------------
-            Ex 2 — Troisième couches en superpositions qui viennent enrichir la visualisation en pertinence avec la thématique: Routes (voiture)
-            -------------------------------------------*/
 
 
             /*-------------------------------------------
@@ -103,7 +92,7 @@
                 var styleBikeShare = new ol.style.Style({
                     image: new ol.style.Icon({
                         src: "https://data.geo.admin.ch/ch.bfe.bikesharing/images/" + feature.get('idsystem') + "_bike.png",
-                        anchor: [0.5, 1]
+                        anchor: [0.5, 0.5]
                     })
                 });
                 console.log(feature.get('idsystem'));
@@ -136,25 +125,52 @@
             });
         }
 
+        
         /*-------------------------------------------
         Ex 1 — Première couche de référence à choix pour l'utilisateur: Satellite map
         -------------------------------------------*/
-        function streetOn() {
+        // PROBLEM: si une station de vélo a été sélectionnée, ce point disparaît après le changement de carte 
+        function nameOn() {
             if (imgSetValue != 1) {
                 document.getElementById("change").innerHTML = '<div id="map"></div>';
-                document.getElementById("name").innerHTML = 'Streetnames <button onclick="streetOn()" disabled="disabled" id="clicked">On</button> <button onclick="streetOff()">Off</button>';
+                document.getElementById("name").innerHTML = 'Streetnames <button onclick="nameOn()" disabled="disabled" id="clicked">On</button> <button onclick="nameOff()">Off</button>';
                 imgSetValue = 1;
                 doGetMapRequests();
             }
         }
 
-        function streetOff() {
+        function nameOff() {
             if (imgSetValue != 0) {
                 document.getElementById("change").innerHTML = '<div id="map"></div>';
-                document.getElementById("name").innerHTML = 'Streetnames <button onclick="streetOn()">On</button> <button onclick="streetOff()" disabled="disabled" id="clicked">Off</button>';
+                document.getElementById("name").innerHTML = 'Streetnames <button onclick="nameOn()">On</button> <button onclick="nameOff()" disabled="disabled" id="clicked">Off</button>';
                 imgSetValue = 0;
                 doGetMapRequests();
             }
+        }
+        
+        
+        /*-------------------------------------------
+        Ex 2 — Première couches en superpositions qui viennent enrichir la visualisation en pertinence avec la thématique: Pistes cyclables
+        -------------------------------------------*/
+        // PROBLEM: trouvé seulement pour Zurich
+        function veloOn() {
+            alert ("function not definined yet");
+        }
+        
+        function veloOff() {
+            alert ("function not definined yet");
+        }
+        
+        
+        /*-------------------------------------------
+        Ex 2 — Deuxième couches en superpositions qui viennent enrichir la visualisation en pertinence avec la thématique: Routes (voiture)
+        -------------------------------------------*/
+        function streetOn() {
+            alert ("function not definined yet");
+        }
+        
+        function streetOff() {
+            alert ("function not definined yet");
         }
 
     </script>
@@ -179,8 +195,8 @@
             <div class="containerContent">
                 <p id="name">
                     Streetnames
-                    <button onclick="streetOn()">On</button>
-                    <button onclick="streetOff()" disabled="disabled" id="clicked">Off</button>
+                    <button onclick="nameOn()">On</button>
+                    <button onclick="nameOff()" disabled="disabled" id="clicked">Off</button>
                 </p>
                 <p id="velo">
                     Cycle paths
