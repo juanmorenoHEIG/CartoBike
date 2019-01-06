@@ -6,7 +6,8 @@
 body {
     background-image: url(../images/background.jpg);
     background-size: cover; 
-    width: 100%;
+    background-repeat: no-repeat;
+    
     
 }
 
@@ -91,11 +92,19 @@ p {
 /*------------------------- Box right --------------------------*/
 .right {
     width: 290px;
-    height: 282.5px;
+    height: 156px;
     float: right;
     background-color: rgba(230, 230, 230, 0.8);
     border: 4px solid white;
     margin-bottom: 10px;
+}
+
+#settings {
+    height: 220px;
+}
+
+#informations {
+    height: 180px;
 }
 
 .right .containerContent {
@@ -104,7 +113,7 @@ p {
 
 .right table {
     font-size: 9px;
-    height: 222px;
+    height: 115px;
     position: relative;
     display: flex;
     justify-content: center;
@@ -116,7 +125,7 @@ button {
     margin-left: 10px;
     padding-left: 20px;
     padding-right: 20px;
-    background-color: #000000;
+    background-color: #444444;
     color: white;
     cursor: pointer;
     border-radius: 15px;
@@ -124,12 +133,12 @@ button {
 }
 
 button:hover {
-    background-color: #444444;
+    background-color: #000000;
     outline: none;
 }
 
 button:focus {
-    background-color: #444444;
+    background-color: #000000;
     
 }
 
@@ -137,11 +146,15 @@ button:active {
   
 }
 
-#clicked {
-    background-color: #444444;
+.clicked {
+    background-color: #000000;
     cursor: auto;
 }
 
+#footnote {
+    margin-top: 10px;
+    font-size: 10px;
+}
 
 /*------------------------- Footer --------------------------*/
 footer {
