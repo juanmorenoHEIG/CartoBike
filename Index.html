@@ -16,8 +16,6 @@
         -------------------------------------------*/
         // for exemple: https://data.stadt-zuerich.ch/dataset/routing-veloweg
         
-        // TODO: add information to pump station, picnic areas, open air baths and lookout points
-
         var map;
 
         $(document).ready(function() {
@@ -34,7 +32,7 @@
 
         var imgSetValue = 0;
 
-        var shareValue = 0;
+        var shareValue = 1;
         var streetValue = 0;
         var veloValue = 0;
         var pumpValue = 0;
@@ -124,36 +122,51 @@
             });
 
 
-            // PROBLEM: interaction pour picnicLayer, pumpLayer, bathLayer et lookoutLayer ne fonctionne pas
-
-            // Event sur click sur un bike pour afficher info
+            // Event sur click sur un icon pour afficher info
             var selectInteraction = new ol.interaction.Select({
                 condition: ol.events.condition.singleClick,
                 // the interactive layers on which the selection is possible (they may be more than one)
-                layers: [shareLayer, picnicLayer, pumpLayer, bathLayer, lookoutLayer]
+                layers: [shareLayer, picnicLayer, pumpLayer, bathLayer, lookoutLayer],
             });
             map.addInteraction(selectInteraction);
             // add a listener to fire when one or more feature from the interactive layer(s) is(are) selected
             selectInteraction.on('select', function(e) {
                 if (e.selected.length > 0) {
-                    var desc = e.selected[0].get("description");
-                    $("#info").html(desc);
-                    /*
-                    var desc = e.selected[0].get("description");
-                    var descPicnic = e.selected[0].get("kontakt");
-
-                    if (e.selected.layers = shareLayer) {
-                        $("#info").html(desc);
-                    } else if (e.selected.layers = picnicLayer) {
-                        $("#info").html('<p>' + descPicnic + '<\p>');
-                    }*/
+                    var descShare = e.selected[0].get("description");
+                    var descPicnic_01 = e.selected[0].get("name");
+                    var descPicnic_02 = e.selected[0].get("kontakt");
+                    var descPicnic_03 = e.selected[0].get("infrastruktur");
+                    var descPicnic_04 = e.selected[0].get("anlageelemente");
+                    var descPump_01 = e.selected[0].get("typ");
+                    var descPump_02 = e.selected[0].get("bezeichnung");
+                    var descBath_01 = e.selected[0].get("name");
+                    var descBath_02 = e.selected[0].get("adresse");
+                    var descBath_03 = e.selected[0].get("plz");
+                    var descBath_04 = e.selected[0].get("ort");
+                    var descBath_05 = e.selected[0].get("tel");
+                    var descBath_06 = e.selected[0].get("www");
+                    var descLookout = e.selected[0].get("name");
+                    
+                    if (descShare) {
+                        $("#info").html(descShare);
+                    } else if (descPicnic_02) {
+                        $("#info").html("<table>\n<p id='title'>\n" + descPicnic_01 + "\n<\p><tr><td class=\\\"cell-left\\\">\nContact\n</td><td>\n" + descPicnic_02 + "\n</td></tr><tr><td>\nInfrastructure\n</td><td>\n" + descPicnic_03 +"\n</td></tr><tr><td>\nPlan Elements\n</td><td>\n" + descPicnic_04 + "\n\n</td></tr>\n</table>\n");
+                    } else if (descPump_01) {
+                        $("#info").html("<table>\n<p id='title'>\n" + descPump_01 + "\n<\p><p id='text'>Address: " + descPump_02 + "</p>\n</table>\n");
+                    } else if (descBath_02) {
+                        $("#info").html("<table>\n<p id='title'>\n" + descBath_01 + "\n<\p><tr><td class=\\\"cell-left\\\">\nAddress\n</td><td>\n" + descBath_02 + ", " + descBath_03 + " " + descBath_04 +"\n</td></tr><tr><td>\nPhone\n</td><td>\n" + descBath_05 +"\n</td></tr><tr><td>\nWeb Address\n</td><td>\n<a href=" + descBath_06 + " target=\\\"_blank\\\">"+ descBath_01 +"</a>\n</table>\n");
+                    } else if (descLookout) {
+                        $("#info").html("<table>\n<p id='title'>\n" + descLookout + "\n<\p>\n</table>\n");
+                    } else {
+                        $("#info").html("Select icon on the map to get feature info");
+                    }
+                    
                 } else {
                     $("#info").html("Select icon on the map to get feature info");
                 }
             })
 
 
-            
             if (streetValue != 0) {
                 streetRequest();
             }
@@ -567,7 +580,7 @@
 
 <body>
     <header>
-        <h1>CartoBike of Zurich</h1>
+        <h1>CartoBike of Zurich City</h1>
         <p>This application is intended for users of rental bicycles.</p>
     </header>
 
@@ -599,8 +612,8 @@
                 </p>
                 <p id="share">
                     Bike Stations
-                    <button onclick="shareOn()">On</button>
-                    <button onclick="shareOff()" disabled="disabled" class="clicked">Off</button>
+                    <button onclick="shareOn()" disabled="disabled" class="clicked">On</button>
+                    <button onclick="shareOff()">Off</button>
                 </p>
                 <p id="pump">
                     Pump Station
