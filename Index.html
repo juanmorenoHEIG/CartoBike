@@ -24,6 +24,8 @@
 
         var format = "GeoJSON";
         var key = "2e55798db539fd5710941684845589cf08cae7b5";
+        var token = "pk.eyJ1Ijoib2VydHoiLCJhIjoiT29aUVYyRSJ9.mz-_gaaigdhurQPHZf7fig";
+
 
         var imgSet = [
             'Aerial',
@@ -66,7 +68,7 @@
         var center = ol.proj.transform([8.54, 47.375], 'EPSG:4326', 'EPSG:3857');
         var view = new ol.View({
             center: center,
-            zoom: 12
+            zoom: 14
         });
 
 
@@ -113,6 +115,17 @@
                 })
             });
 
+            vectorLayer = new ol.layer.Vector({
+                source: new ol.source.Vector(), // empty source
+                style: new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: '#ff0000',
+                        width: 4
+                    })
+                })
+            });
+            
+
             map = new ol.Map({
                 target: 'map',
                 layers: [
@@ -123,14 +136,19 @@
                 loadTilesWhileInteracting: true,
                 view: view
             });
-
+            initRoute();
             
+            map.on("singleclick", function (e) {
+                var fts = vectorLayer.getSource().getFeatures();
+                fts[0].getGeometry().appendCoordinate(e.coordinate);
+                console.log("fts: " + fts);
+            });
 
             // Event sur click sur un icon pour afficher info
             var selectInteraction = new ol.interaction.Select({
                 condition: ol.events.condition.singleClick,
                 // the interactive layers on which the selection is possible (they may be more than one)
-                layers: [shareLayer, picnicLayer, pumpLayer, bathLayer, lookoutLayer],
+                layers: [shareLayer, picnicLayer, pumpLayer, bathLayer, lookoutLayer, vectorLayer],
             });
             map.addInteraction(selectInteraction);
             // add a listener to fire when one or more feature from the interactive layer(s) is(are) selected
@@ -138,7 +156,6 @@
                 
                 if (e.selected.length > 0) {
                     var descShare = e.selected[0].get("description");
-                    //var descShare = e.selected[0].get("coordinates");
                     var descPicnic_01 = e.selected[0].get("name");
                     var descPicnic_02 = e.selected[0].get("kontakt");
                     var descPicnic_03 = e.selected[0].get("infrastruktur");
@@ -186,6 +203,36 @@
                 }
             })
 
+            $("#route").click(function (e) {
+                var fts = vectorLayer.getSource().getFeatures();
+                if (fts[0].getGeometry().getLength() >= 2) {
+                    ft = fts[0].getGeometry().clone().transform("EPSG:3857", "EPSG:4326");
+                    var s = ft.getCoordinates().join(";");
+                    console.log(s);
+
+                    var url = "https://api.mapbox.com/v4/directions/mapbox.walking/" + s + ".json?access_token=" + token;
+                    $.get(url, function (data) {
+                        if(data.origin.properties.name && data.destination.properties.name){
+                        $("#info").html("<p/>De "+data.origin.properties.name + " à " + data.destination.properties.name+"</p>");
+                        }
+                        var geom = new ol.geom.LineString(data.routes[0].geometry.coordinates);
+                        var ft = new ol.Feature({
+                            geometry: geom.transform("EPSG:4326", "EPSG:3857"),
+                            name: "Route 1"
+                        });
+                        vectorLayer.getSource().addFeature(ft);
+                        var fts = vectorLayer.getSource().getFeatures();
+                        fts[0].getGeometry().setCoordinates([]);
+                    });
+                }
+            });
+
+            $("#reset").click(function (e) {
+                vectorLayer.getSource().clear();
+                $("#info p").remove();
+                initRoute();
+            });   
+
 
             if (streetValue != 0) {
                 streetRequest();
@@ -214,6 +261,8 @@
             if (lookoutValue != 0) {
                 lookoutRequest();
             }
+
+            
         }
 
         // StreetLayer Suisse
@@ -410,6 +459,8 @@
             }
 
         }
+
+        
 
 
         /*-------------------------------------------
@@ -614,6 +665,17 @@
             xhr.send();
         };
 
+        function initRoute(){
+                // Just add a first empty LineString
+                map.addLayer(vectorLayer);
+                var geom = new ol.geom.LineString([]);
+                var ft = new ol.Feature({
+                    geometry: geom,
+                    name: "Input feature"
+                });
+                vectorLayer.getSource().addFeature(ft);
+        }
+
         function createBikeShareStyle(feature, resolution) {
             var styleBikeShare = new ol.style.Style({
                 image: new ol.style.Icon({
@@ -639,14 +701,18 @@
     <header>
         <h1>CartoBike of Zurich City</h1>
         <p>This application is intended for users of rental bicycles.</p>
+        
     </header>
 
     <div class="container">
         <div class="left">
+                
             <h3 class="containerHead">Map</h3>
+            
             <div class="containerContent" id="change">
-                <div>
-                    <button type="button" onclick="calcWay()">Calculate way</button> 
+                <div id="information">
+                        <img id="route" src="./img/calc.png"/>
+                        <img id="reset" src="./img/reset.png"/>
                 </div>
                 <div id="map"></div>
             </div>

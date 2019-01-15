@@ -74,7 +74,7 @@ p {
 
 .left {
     width: 900px;
-    height: 575px;
+    height: 611px;
     float: left;
     border: 4px solid white;
 }
@@ -196,4 +196,14 @@ div.btn {
 div.btn.on {
     background-color: #777;
     color: white;
+}
+
+img {
+    width: auto;
+    height: 120%;
+    margin: 4px;
+}
+
+#information {
+    background-color:rgba(230, 230, 230, 0.8);
 }
