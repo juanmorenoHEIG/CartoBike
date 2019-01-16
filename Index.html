@@ -10,12 +10,6 @@
     <script type="text/javascript" src="js/config.js"></script>
 
     <script type="text/javascript">
-        // TODO 
-        /*-------------------------------------------
-        Ex 4 — une interaction avec un géoservices de traitement qui représente une valeur ajoutée à la visualisation
-        -------------------------------------------*/
-        // for exemple: https://data.stadt-zuerich.ch/dataset/routing-veloweg
-        
         var map;
 
         $(document).ready(function() {
@@ -39,6 +33,8 @@
         var veloValue = 0;
         var pumpValue = 0;
 
+        var pathValue = 0;
+
         var picnicValue = 0;
         var bathValue = 0;
         var lookoutValue = 0;
@@ -55,7 +51,7 @@
         });
         */
 
-        // Kanton Zürich
+        // Canton Zürich
         /*
         var center = ol.proj.transform([8.6, 47.4], 'EPSG:4326', 'EPSG:3857');
         var view = new ol.View({
@@ -64,7 +60,7 @@
         });
         */
 
-        // Stadt Zürich
+        // Ville Zürich
         var center = ol.proj.transform([8.54, 47.375], 'EPSG:4326', 'EPSG:3857');
         var view = new ol.View({
             center: center,
@@ -124,7 +120,7 @@
                     })
                 })
             });
-            
+
 
             map = new ol.Map({
                 target: 'map',
@@ -136,13 +132,7 @@
                 loadTilesWhileInteracting: true,
                 view: view
             });
-            initRoute();
-            
-            map.on("singleclick", function (e) {
-                var fts = vectorLayer.getSource().getFeatures();
-                fts[0].getGeometry().appendCoordinate(e.coordinate);
-                console.log("fts: " + fts);
-            });
+
 
             // Event sur click sur un icon pour afficher info
             var selectInteraction = new ol.interaction.Select({
@@ -153,7 +143,7 @@
             map.addInteraction(selectInteraction);
             // add a listener to fire when one or more feature from the interactive layer(s) is(are) selected
             selectInteraction.on('select', function(e) {
-                
+
                 if (e.selected.length > 0) {
                     var descShare = e.selected[0].get("description");
                     var descPicnic_01 = e.selected[0].get("name");
@@ -169,79 +159,46 @@
                     var descBath_05 = e.selected[0].get("tel");
                     var descBath_06 = e.selected[0].get("www");
                     var descLookout = e.selected[0].get("name");
-                    
+
                     var descCoordonates = e.selected[0].getGeometry().getCoordinates();
-                    
-                    if(!start){
+
+                    if (!start) {
                         start = descCoordonates
-                    }else if(!end){
+                    } else if (!end) {
                         end = descCoordonates
-                    }else{
-                        start ="";
-                        end="";
+                    } else {
+                        start = "";
+                        end = "";
                     }
-                     console.log(start + end);
-                    
+                    console.log(start + end);
+
                     if (descShare) {
                         $("#info").html(descShare);
                     } else if (descPicnic_02) {
-                        $("#info").html("<table>\n<p id='title'>\n" + descPicnic_01 + "\n<\p><tr><td class=\\\"cell-left\\\">\nContact\n</td><td>\n" + descPicnic_02 + "\n</td></tr><tr><td>\nInfrastructure\n</td><td>\n" + descPicnic_03 +"\n</td></tr><tr><td>\nPlan Elements\n</td><td>\n" + descPicnic_04 + "\n\n</td></tr>\n</table>\n");
+                        $("#info").html("<table>\n<p id='title'>\n" + descPicnic_01 + "\n<\p><tr><td class=\\\"cell-left\\\">\nContact\n</td><td>\n" + descPicnic_02 + "\n</td></tr><tr><td>\nInfrastructure\n</td><td>\n" + descPicnic_03 + "\n</td></tr><tr><td>\nPlan Elements\n</td><td>\n" + descPicnic_04 + "\n\n</td></tr>\n</table>\n");
                     } else if (descPump_01) {
                         $("#info").html("<table>\n<p id='title'>\n" + descPump_01 + "\n<\p><p id='text'>Address: " + descPump_02 + "</p>\n</table>\n");
                     } else if (descBath_02) {
-                        $("#info").html("<table>\n<p id='title'>\n" + descBath_01 + "\n<\p><tr><td class=\\\"cell-left\\\">\nAddress\n</td><td>\n" + descBath_02 + ", " + descBath_03 + " " + descBath_04 +"\n</td></tr><tr><td>\nPhone\n</td><td>\n" + descBath_05 +"\n</td></tr><tr><td>\nWeb Address\n</td><td>\n<a href=" + descBath_06 + " target=\\\"_blank\\\">"+ descBath_01 +"</a>\n</table>\n");
+                        $("#info").html("<table>\n<p id='title'>\n" + descBath_01 + "\n<\p><tr><td class=\\\"cell-left\\\">\nAddress\n</td><td>\n" + descBath_02 + ", " + descBath_03 + " " + descBath_04 + "\n</td></tr><tr><td>\nPhone\n</td><td>\n" + descBath_05 + "\n</td></tr><tr><td>\nWeb Address\n</td><td>\n<a href=" + descBath_06 + " target=\\\"_blank\\\">" + descBath_01 + "</a>\n</table>\n");
                     } else if (descLookout) {
                         $("#info").html("<table>\n<p id='title'>\n" + descLookout + "\n<\p>\n</table>\n");
                     } else {
                         $("#info").html("Select icon on the map to get feature info");
                     }
 
-                    
-                    
                 } else {
                     $("#info").html("Select icon on the map to get feature info");
                 }
             })
 
-            $("#route").click(function (e) {
-                var fts = vectorLayer.getSource().getFeatures();
-                if (fts[0].getGeometry().getLength() >= 2) {
-                    ft = fts[0].getGeometry().clone().transform("EPSG:3857", "EPSG:4326");
-                    var s = ft.getCoordinates().join(";");
-                    console.log(s);
-
-                    var url = "https://api.mapbox.com/v4/directions/mapbox.walking/" + s + ".json?access_token=" + token;
-                    $.get(url, function (data) {
-                        if(data.origin.properties.name && data.destination.properties.name){
-                        $("#info").html("<p/>De "+data.origin.properties.name + " à " + data.destination.properties.name+"</p>");
-                        }
-                        var geom = new ol.geom.LineString(data.routes[0].geometry.coordinates);
-                        var ft = new ol.Feature({
-                            geometry: geom.transform("EPSG:4326", "EPSG:3857"),
-                            name: "Route 1"
-                        });
-                        vectorLayer.getSource().addFeature(ft);
-                        var fts = vectorLayer.getSource().getFeatures();
-                        fts[0].getGeometry().setCoordinates([]);
-                    });
-                }
-            });
-
-            $("#reset").click(function (e) {
-                vectorLayer.getSource().clear();
-                $("#info p").remove();
-                initRoute();
-            });   
-
-
             if (streetValue != 0) {
                 streetRequest();
             }
-            
+
             if (veloValue != 0) {
                 veloRequest();
             }
-                    
+
             if (shareValue != 0) {
                 shareRequest();
             }
@@ -262,9 +219,39 @@
                 lookoutRequest();
             }
 
-            
+            if (pathValue != 0) {
+                pathRequest();
+            }
+
         }
 
+
+        /*-------------------------------------------
+        Ex 1 — Première couche de référence, Version 2: Satellite map
+        -------------------------------------------*/
+        function nameOn() {
+            if (imgSetValue != 1) {
+                document.getElementById("change").innerHTML = '<div id="map"></div>';
+                document.getElementById("name").innerHTML = 'Names <button onclick="nameOn()" disabled="disabled" class="clicked">On</button> <button onclick="nameOff()">Off</button>';
+                imgSetValue = 1;
+                doGetMapRequests();
+            }
+        }
+
+        function nameOff() {
+            if (imgSetValue != 0) {
+                document.getElementById("change").innerHTML = '<div id="map"></div>';
+                document.getElementById("name").innerHTML = 'Names <button onclick="nameOn()">On</button> <button onclick="nameOff()" disabled="disabled" class="clicked">Off</button>';
+                imgSetValue = 0;
+                doGetMapRequests();
+            }
+        }
+
+
+        /*-------------------------------------------
+        Ex 2 — Couche en superpositions qui viennent enrichir la visualisation en pertinence avec la thématique: Routes
+        -------------------------------------------*/
+        /*
         // StreetLayer Suisse
         var streetLayer = new ol.layer.Tile({
             source: new ol.source.TileWMS({
@@ -276,9 +263,8 @@
                     FORMAT: "image/png"
                 }
             })
-        });
+        });*/
 
-        
         // https://data.stadt-zuerich.ch/dataset/veloweg
         var streetLayer = new ol.layer.Vector({
             title: "Streets",
@@ -303,8 +289,23 @@
             }
 
         }
-        
-        
+
+        function streetOn() {
+            streetValue = 1;
+            document.getElementById("street").innerHTML = 'Streets <button onclick="streetOn()" disabled="disabled" class="clicked">On</button> <button onclick="streetOff()">Off</button>';
+            streetRequest();
+        }
+
+        function streetOff() {
+            streetValue = 0;
+            document.getElementById("street").innerHTML = 'Streets <button onclick="streetOn()">On</button> <button onclick="streetOff()" disabled="disabled" class="clicked">Off</button>';
+            streetRequest();
+        }
+
+
+        /*-------------------------------------------
+        Ex 2 — Couche en superpositions qui viennent enrichir la visualisation en pertinence avec la thématique
+        -------------------------------------------*/
         // https://opendata.swiss/de/dataset/wms-velonetz1
         var veloLayer = new ol.layer.Tile({
             source: new ol.source.TileWMS({
@@ -326,7 +327,40 @@
             }
 
         }
-        
+
+        function veloOn() {
+            veloValue = 1;
+            document.getElementById("velo").innerHTML = 'Cycle paths <button onclick="veloOn()" disabled="disabled" class="clicked">On</button> <button onclick="veloOff()">Off</button>';
+            veloRequest();
+        }
+
+        function veloOff() {
+            veloValue = 0;
+            document.getElementById("velo").innerHTML = 'Cycle paths <button onclick="veloOn()">On</button> <button onclick="veloOff()" disabled="disabled" class="clicked">Off</button>';
+            veloRequest();
+        }
+
+
+        /*-------------------------------------------
+        Ex 3 — Couche en super superposition de type vector et les possibilités d'interaction avec celle-ci
+        -------------------------------------------*/
+        function createBikeShareStyle(feature, resolution) {
+            var styleBikeShare = new ol.style.Style({
+                image: new ol.style.Icon({
+                    src: "https://data.geo.admin.ch/ch.bfe.bikesharing/images/" + feature.get('idsystem') + "_bike.png",
+                    anchor: [0.5, 0.5]
+                })
+            });
+            return styleBikeShare;
+        };
+        var shareLayer = new ol.layer.Vector({
+            title: "BikeSharing",
+            source: new ol.source.Vector({
+                url: "https://stefanieschlumpf.carto.com/api/v2/sql?q=select*from%20public.ch_bfe_bikesharing_en&format=" + format + "&api_key=" + key,
+                format: new ol.format.GeoJSON()
+            }),
+            style: createBikeShareStyle
+        });
         
         function shareRequest() {
 
@@ -338,12 +372,27 @@
 
         }
 
+        function shareOn() {
+            shareValue = 1;
+            document.getElementById("share").innerHTML = 'Bike Stations <button onclick="shareOn()" disabled="disabled" class="clicked">On</button> <button onclick="shareOff()">Off</button>';
+            shareRequest();
+        }
 
+        function shareOff() {
+            shareValue = 0;
+            document.getElementById("share").innerHTML = 'Bike Stations <button onclick="shareOn()">On</button> <button onclick="shareOff()" disabled="disabled" class="clicked">Off</button>';
+            shareRequest();
+        }
+
+
+        /*-------------------------------------------
+        Ex 3 — Couche en super superposition de type vector et les possibilités d'interaction avec celle-ci
+        -------------------------------------------*/
         // https://data.stadt-zuerich.ch/dataset/velopumpstation
         function createPumpStyle(feature, resolution) {
             var stylePump = new ol.style.Style({
                 image: new ol.style.Icon({
-                    scale : 0.07,
+                    scale: 0.07,
                     src: "images/pump.png",
                     anchor: [0.5, 1]
                 })
@@ -369,11 +418,27 @@
 
         }
 
+        function pumpOn() {
+            pumpValue = 1;
+            document.getElementById("pump").innerHTML = 'Pump Station <button onclick="pumpOn()" disabled="disabled" class="clicked">On</button> <button onclick="pumpOff()">Off</button>';
+            pumpRequest();
+        }
+
+        function pumpOff() {
+            pumpValue = 0;
+            document.getElementById("pump").innerHTML = 'Pump Station <button onclick="pumpOn()">On</button> <button onclick="pumpOff()" disabled="disabled" class="clicked">Off</button>';
+            pumpRequest();
+        }
+
+
+        /*-------------------------------------------
+        Ex 3 — Couche en super superposition de type vector et les possibilités d'interaction avec celle-ci
+        -------------------------------------------*/
         // https://data.stadt-zuerich.ch/dataset/picknickplatz
         function createPicnicStyle(feature, resolution) {
             var stylePicnic = new ol.style.Style({
                 image: new ol.style.Icon({
-                    scale : 0.07,
+                    scale: 0.07,
                     src: "images/picnic.png",
                     anchor: [0.5, 1]
                 })
@@ -400,11 +465,27 @@
 
         }
 
+        function picnicOn() {
+            picnicValue = 1;
+            document.getElementById("picnic").innerHTML = 'Picnic Areas <button onclick="picnicOn()" disabled="disabled" class="clicked">On</button> <button onclick="picnicOff()">Off</button>';
+            picnicRequest();
+        }
+
+        function picnicOff() {
+            picnicValue = 0;
+            document.getElementById("picnic").innerHTML = 'Picnic Areas <button onclick="picnicOn()">On</button> <button onclick="picnicOff()" disabled="disabled" class="clicked">Off</button>';
+            picnicRequest();
+        }
+
+
+        /*-------------------------------------------
+        Ex 3 — Couche en super superposition de type vector et les possibilités d'interaction avec celle-ci
+        -------------------------------------------*/
         // https://data.stadt-zuerich.ch/dataset/freibad
         function createBathStyle(feature, resolution) {
             var styleBath = new ol.style.Style({
                 image: new ol.style.Icon({
-                    scale : 0.07,
+                    scale: 0.07,
                     src: "images/bath.png",
                     anchor: [0.5, 1]
                 })
@@ -430,147 +511,6 @@
 
         }
 
-        // https://data.stadt-zuerich.ch/dataset/aussichtspunkt
-        function createLookoutStyle(feature, resolution) {
-            var styleLookout = new ol.style.Style({
-                image: new ol.style.Icon({
-                    scale : 0.07,
-                    src: "images/lookout.png",
-                    anchor: [0.5, 1]
-                })
-            });
-            return styleLookout;
-        };
-        var lookoutLayer = new ol.layer.Vector({
-            title: "LookoutPoints",
-            source: new ol.source.Vector({
-                url: "https://stefanieschlumpf.carto.com/api/v2/sql?q=select*from%20public.aussichtspunkt&format=" + format + "&api_key=" + key,
-                format: new ol.format.GeoJSON()
-            }),
-            style: createLookoutStyle
-        });
-
-        function lookoutRequest() {
-
-            if (lookoutValue != 0) {
-                map.addLayer(lookoutLayer);
-            } else {
-                map.removeLayer(lookoutLayer);
-            }
-
-        }
-
-        
-
-
-        /*-------------------------------------------
-        Ex 1 — Première couche de référence, Version 2: Satellite map
-        -------------------------------------------*/
-        // PROBLEM: si une station de vélo a été sélectionnée, ce point disparaît après le changement de carte 
-        function nameOn() {
-            if (imgSetValue != 1) {
-                document.getElementById("change").innerHTML = '<div id="map"></div>';
-                document.getElementById("name").innerHTML = 'Names <button onclick="nameOn()" disabled="disabled" class="clicked">On</button> <button onclick="nameOff()">Off</button>';
-                imgSetValue = 1;
-                doGetMapRequests();
-            }
-        }
-
-        function nameOff() {
-            if (imgSetValue != 0) {
-                document.getElementById("change").innerHTML = '<div id="map"></div>';
-                document.getElementById("name").innerHTML = 'Names <button onclick="nameOn()">On</button> <button onclick="nameOff()" disabled="disabled" class="clicked">Off</button>';
-                imgSetValue = 0;
-                doGetMapRequests();
-            }
-        }
-        
-        
-        /*-------------------------------------------
-        Ex 2 — Couche en superpositions qui viennent enrichir la visualisation en pertinence avec la thématique: Routes
-        -------------------------------------------*/
-        function streetOn() {
-            streetValue = 1;
-            document.getElementById("street").innerHTML = 'Streets <button onclick="streetOn()" disabled="disabled" class="clicked">On</button> <button onclick="streetOff()">Off</button>';
-            streetRequest();
-        }
-
-        function streetOff() {
-            streetValue = 0;
-            document.getElementById("street").innerHTML = 'Streets <button onclick="streetOn()">On</button> <button onclick="streetOff()" disabled="disabled" class="clicked">Off</button>';
-            streetRequest();
-        }
-        
-        
-        /*-------------------------------------------
-        Ex 2 — Couche en superpositions qui viennent enrichir la visualisation en pertinence avec la thématique
-        -------------------------------------------*/
-        // PROBLEM: trouvé seulement pour Zurich
-        function veloOn() {
-            veloValue = 1;
-            document.getElementById("velo").innerHTML = 'Cycle paths <button onclick="veloOn()" disabled="disabled" class="clicked">On</button> <button onclick="veloOff()">Off</button>';
-            veloRequest();
-        }
-
-        function veloOff() {
-            veloValue = 0;
-            document.getElementById("velo").innerHTML = 'Cycle paths <button onclick="veloOn()">On</button> <button onclick="veloOff()" disabled="disabled" class="clicked">Off</button>';
-            veloRequest();
-        }
-
-        
-        /*-------------------------------------------
-        Ex 3 — Couche en super superposition de type vector et les possibilités d'interaction avec celle-ci
-        -------------------------------------------*/
-        // PROBLEM: trouvé seulement pour Zurich
-        function shareOn() {
-            shareValue = 1;
-            document.getElementById("share").innerHTML = 'Bike Stations <button onclick="shareOn()" disabled="disabled" class="clicked">On</button> <button onclick="shareOff()">Off</button>';
-            shareRequest();
-        }
-
-        function shareOff() {
-            shareValue = 0;
-            document.getElementById("share").innerHTML = 'Bike Stations <button onclick="shareOn()">On</button> <button onclick="shareOff()" disabled="disabled" class="clicked">Off</button>';
-            shareRequest();
-        }
-
-
-        /*-------------------------------------------
-        Ex 3 — Couche en super superposition de type vector et les possibilités d'interaction avec celle-ci
-        -------------------------------------------*/
-        function pumpOn() {
-            pumpValue = 1;
-            document.getElementById("pump").innerHTML = 'Pump Station <button onclick="pumpOn()" disabled="disabled" class="clicked">On</button> <button onclick="pumpOff()">Off</button>';
-            pumpRequest();
-        }
-
-        function pumpOff() {
-            pumpValue = 0;
-            document.getElementById("pump").innerHTML = 'Pump Station <button onclick="pumpOn()">On</button> <button onclick="pumpOff()" disabled="disabled" class="clicked">Off</button>';
-            pumpRequest();
-        }
-
-
-        /*-------------------------------------------
-        Ex 3 — Couche en super superposition de type vector et les possibilités d'interaction avec celle-ci
-        -------------------------------------------*/
-        function picnicOn() {
-            picnicValue = 1;
-            document.getElementById("picnic").innerHTML = 'Picnic Areas <button onclick="picnicOn()" disabled="disabled" class="clicked">On</button> <button onclick="picnicOff()">Off</button>';
-            picnicRequest();
-        }
-
-        function picnicOff() {
-            picnicValue = 0;
-            document.getElementById("picnic").innerHTML = 'Picnic Areas <button onclick="picnicOn()">On</button> <button onclick="picnicOff()" disabled="disabled" class="clicked">Off</button>';
-            picnicRequest();
-        }
-
-
-        /*-------------------------------------------
-        Ex 3 — Couche en super superposition de type vector et les possibilités d'interaction avec celle-ci
-        -------------------------------------------*/
         function bathOn() {
             bathValue = 1;
             document.getElementById("bath").innerHTML = 'Open Air Baths <button onclick="bathOn()" disabled="disabled" class="clicked">On</button> <button onclick="bathOff()">Off</button>';
@@ -587,6 +527,35 @@
         /*-------------------------------------------
         Ex 3 — Couche en super superposition de type vector et les possibilités d'interaction avec celle-ci
         -------------------------------------------*/
+        // https://data.stadt-zuerich.ch/dataset/aussichtspunkt
+        function createLookoutStyle(feature, resolution) {
+            var styleLookout = new ol.style.Style({
+                image: new ol.style.Icon({
+                    scale: 0.07,
+                    src: "images/lookout.png",
+                    anchor: [0.5, 1]
+                })
+            });
+            return styleLookout;
+        };
+        
+        var lookoutLayer = new ol.layer.Vector({
+            title: "LookoutPoints",
+            source: new ol.source.Vector({
+                url: "https://stefanieschlumpf.carto.com/api/v2/sql?q=select*from%20public.aussichtspunkt&format=" + format + "&api_key=" + key,
+                format: new ol.format.GeoJSON()
+            }),
+            style: createLookoutStyle
+        });
+
+        function lookoutRequest() {
+            if (lookoutValue != 0) {
+                map.addLayer(lookoutLayer);
+            } else {
+                map.removeLayer(lookoutLayer);
+            }
+        }
+
         function lookoutOn() {
             lookoutValue = 1;
             document.getElementById("lookout").innerHTML = 'Lookout Points <button onclick="lookoutOn()" disabled="disabled" class="clicked">On</button> <button onclick="lookoutOff()">Off</button>';
@@ -599,100 +568,77 @@
             lookoutRequest();
         }
 
+
         /*-------------------------------------------
-        Ex 3 — Couche en super superposition de type vector et les possibilités d'interaction avec celle-ci
+        Ex 4 — une interaction avec un géoservices de traitement qui représente une valeur ajoutée à la visualisation
         -------------------------------------------*/
-        /*
-        // PROBLEM: compte carto expiré
-        var q = "select*from%20public.ch_bfe_bikesharing_fr";
-        var fromat = "GeoJSON";
-        var key = "a1a59d709941fb82f30fafa226924d04a23ba185";
-
-        function createBikeShareStyle(feature, resolution) {
-            var styleBikeShare = new ol.style.Style({
-                image: new ol.style.Icon({
-                    src: "https://data.geo.admin.ch/ch.bfe.bikesharing/images/" + feature.get('idsystem') + "_bike.png",
-                    anchor: [0.5, 0.5]
-                })
-            });
-            console.log(feature.get('idsystem'));
-            return styleBikeShare;
-        };
-        var bikeLyr = new ol.layer.Vector({
-            title: "BikeSharing",
-            source: new ol.source.Vector({
-                url: "https://juanmorenoheig.carto.com/api/v2/sql?q=" + q + "&format=" + fromat + "&api_key=" + key,
-                format: new ol.format.GeoJSON()
-            }),
-            style: createBikeShareStyle
-        });
-        });*/
-
-        function calcWay(){
-            var start1 = ol.proj.transform(start, 'EPSG:3857', 'EPSG:4326').reverse().toString();
-            var end1 = ol.proj.transform(end, 'EPSG:3857', 'EPSG:4326').reverse().toString();
-
-            var url = "https://dev.virtualearth.net/REST/v1/Routes?wp.0=" + start1 + "&wp.1=" + end1 +
-                        "&routeAttributes=routePath&key=" + bingKey;
-
-            var xhr = new XMLHttpRequest();
-
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState == 4) {
-                if (xhr.status == 200) {
-                    var linestring = JSON.parse(xhr.responseText).resourceSets[0].resources[0].routePath.line.coordinates;
-                    for (var i=0; i<linestring.length; i++) {
-                    linestring[i].reverse();
-                    }
-                    var layerLines = new ol.layer.Vector({
-                    source: new ol.source.Vector({
-                        features: [new ol.Feature({
-                        geometry: new ol.geom.LineString(linestring).transform('EPSG:4326', 'EPSG:3857'),
-                        name: 'Line'
-                        })]
-                    }),
-                    });
-                    map.addLayer(layerLines);   
-                }
-                }
-            }
-
-            xhr.onerror = function(e) { console.log("error"); }
-            xhr.ontimeout = function(e) { console.log("timeout"); }
-
-            xhr.open("GET", url, true);
-            xhr.timeout = 3000;
-            xhr.send();
-        };
-
-        function initRoute(){
+        function pathRequest() {
+            if (pathValue != 0) {
+                map.on("singleclick", function(e) {
+                    var fts = vectorLayer.getSource().getFeatures();
+                    fts[0].getGeometry().appendCoordinate(e.coordinate);
+                    console.log("fts: " + fts);
+                });
                 // Just add a first empty LineString
                 map.addLayer(vectorLayer);
+                vectorLayer.getSource().clear();
                 var geom = new ol.geom.LineString([]);
                 var ft = new ol.Feature({
                     geometry: geom,
                     name: "Input feature"
                 });
                 vectorLayer.getSource().addFeature(ft);
+            } else {
+                map.removeLayer(vectorLayer);
+            }
         }
 
-        function createBikeShareStyle(feature, resolution) {
-            var styleBikeShare = new ol.style.Style({
-                image: new ol.style.Icon({
-                    src: "https://data.geo.admin.ch/ch.bfe.bikesharing/images/" + feature.get('idsystem') + "_bike.png",
-                    anchor: [0.5, 0.5]
-                })
+        function pathOn() {
+            pathValue = 1;
+            document.getElementById("path").innerHTML = 'Path calculation <button onclick="pathOn()" disabled="disabled" class="clicked">On</button> <button onclick="pathOff()">Off</button><br><button onclick="reset()" id="res">RESET</button><button onclick="calculate()" id="calc">CALCULATE</button>';
+            pathRequest();
+        }
+
+        function pathOff() {
+            pathValue = 0;
+            document.getElementById("path").innerHTML = 'Path calculation <button onclick="pathOn()">On</button> <button onclick="pathOff()" disabled="disabled" class="clicked">Off</button><br><button onclick="reset()" disabled="disabled" class="clicked" id="res">RESET</button><button onclick="calculate()" disabled="disabled" class="clicked" id="calc">CALCULATE</button>';
+            pathRequest();
+        }
+
+        function calculate() {
+            var fts = vectorLayer.getSource().getFeatures();
+            if (fts[0].getGeometry().getLength() >= 2) {
+                ft = fts[0].getGeometry().clone().transform("EPSG:3857", "EPSG:4326");
+                var s = ft.getCoordinates().join(";");
+                console.log(s);
+
+                var url = "https://api.mapbox.com/v4/directions/mapbox.walking/" + s + ".json?access_token=" + token;
+                $.get(url, function(data) {
+                    if (data.origin.properties.name && data.destination.properties.name) {
+                        $("#info").html("<p/>From " + data.origin.properties.name + " to " + data.destination.properties.name + "</p>");
+                    }
+                    var geom = new ol.geom.LineString(data.routes[0].geometry.coordinates);
+                    var ft = new ol.Feature({
+                        geometry: geom.transform("EPSG:4326", "EPSG:3857"),
+                        name: "Route 1"
+                    });
+                    vectorLayer.getSource().addFeature(ft);
+                    var fts = vectorLayer.getSource().getFeatures();
+                    fts[0].getGeometry().setCoordinates([]);
+                });
+            }
+        }
+
+        function reset() {
+            vectorLayer.getSource().clear();
+            var geom = new ol.geom.LineString([]);
+            var ft = new ol.Feature({
+                geometry: geom,
+                name: "Input feature"
             });
-            return styleBikeShare;
-        };
-        var shareLayer = new ol.layer.Vector({
-            title: "BikeSharing",
-            source: new ol.source.Vector({
-                url: "https://stefanieschlumpf.carto.com/api/v2/sql?q=select*from%20public.ch_bfe_bikesharing_en&format=" + format + "&api_key=" + key,
-                format: new ol.format.GeoJSON()
-            }),
-            style: createBikeShareStyle
-        });
+            vectorLayer.getSource().addFeature(ft);
+            $("#info p").remove();
+        }
 
     </script>
 </head>
@@ -700,20 +646,16 @@
 <body>
     <header>
         <h1>CartoBike of Zurich City</h1>
-        <p>This application is intended for users of rental bicycles.</p>
-        
+        <p>This application is intended for users of rental bicycles in Zurich City.</p>
+
     </header>
 
     <div class="container">
         <div class="left">
-                
+
             <h3 class="containerHead">Map</h3>
-            
+
             <div class="containerContent" id="change">
-                <div id="information">
-                        <img id="route" src="./img/calc.png"/>
-                        <img id="reset" src="./img/reset.png"/>
-                </div>
                 <div id="map"></div>
             </div>
         </div>
@@ -746,6 +688,15 @@
                     <button onclick="pumpOn()">On</button>
                     <button onclick="pumpOff()" disabled="disabled" class="clicked">Off</button>
                 </p>
+                <p id="path">
+                    Path calculation
+                    <button onclick="pathOn()">On</button>
+                    <button onclick="pathOff()" disabled="disabled" class="clicked">Off</button>
+                    <br>
+                    <button onclick="reset()" disabled="disabled" class="clicked" id="res">RESET</button>
+                    <button onclick="calculate()" disabled="disabled" class="clicked" id="calc">CALCULATE</button>
+                </p>
+
             </div>
         </div>
 
