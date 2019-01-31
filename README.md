@@ -18,3 +18,17 @@ Pour le projet de cartographie en ligne, la thématique s’adresse aux touriste
 2. Les couches en superpositions pourraient comprendre divers sentiers de promenade à pied et à vélo, ou les transports publiques à disposition.
 3. Les vecteurs seraient divers lieux culturels à visiter comme des établissement, des musées, ou des bâtiments protégées.
 4. Un traitement calculerait des itinéraires pour aider les touristes
+
+
+----------------------------------------
+
+### Installation
+1. Télécharger le dossier compressé, CartoBike-master.zip à l'adresse https://github.com/juanmorenoHEIG/CartoBike
+2. Décompressez le dossier à l'emplacement de votre choix.
+3. Lancer le fichier Index.html
+
+
+----------------------------------------
+
+### Structure 
+![Alt text](structure.jpg?raw=true "Structure")
